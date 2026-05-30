@@ -1,0 +1,14 @@
+{
+  "name": "triage-backend",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Mock API for the patient-triage app. Replace the in-memory store with a real DB / device ingestion as you build out the backend.",
+  "scripts": {
+    "dev": "node --watch server.js",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
