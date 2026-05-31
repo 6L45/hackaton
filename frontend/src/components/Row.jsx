@@ -9,12 +9,14 @@ export default function Row({ p, open, hl, nowMin, onToggle }) {
   if (treating) cls.push('treating');
   if (hl) cls.push('hl');
   if (p.isnew) cls.push('isnew');
+  if (p.behavioral) cls.push('beh');
   return (
     <div className={cls.join(' ')} onClick={onToggle}>
       <span className="cell-state">
         <span className="sdot"></span>
         <span className="slabel">{SEVMETA[p.sev].label}</span>
         {treating && <span className="treat-chip">en cours</span>}
+        {p.behavioral && <span className="beh-chip" title={p.behavioral.message}>⚠ Comportement</span>}
       </span>
       <span className="cell-id"><span className="name">{p.nom}</span> <span className="given">{p.prenom}</span></span>
       <span className="addr">{p.addr}, {p.ville}</span>

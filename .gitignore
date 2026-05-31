@@ -1,9 +1,38 @@
+# Dependencies
 node_modules/
-dist/
-.env
-.env.local
-*.log
-.DS_Store
 
-# source artifact (design zip)
+# Build output
+dist/
+build/
+
+# Vite / tooling cache
+.vite/
+.cache/
+coverage/
+
+# Local database (SQLite — generated + seeded at runtime)
+backend/data/
+*.sqlite
+*.db
+*.db-wal
+*.db-shm
+
+# Env files
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Source artifact (design zip)
 hackaton.zip

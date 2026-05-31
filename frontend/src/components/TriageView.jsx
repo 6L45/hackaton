@@ -6,12 +6,21 @@ import Row from './Row.jsx';
 import DetailPanel from './DetailPanel.jsx';
 
 const isTodo = (p) => p.time && p.sev >= 4 && p.status === 'open';
+const isTreating = (p) => p.status === 'treating';
+
+// Mutually-exclusive filter tabs. Clicking a tab selects it; the already
+// selected tab is a no-op (no toggling off).
+const matchesFilter = (p, filter) => {
+  if (filter === 'todo') return isTodo(p);
+  if (filter === 'treating') return isTreating(p);
+  if (filter === 'sans-treating') return !isTreating(p); // "Tous sauf en cours"
+  return true; // 'tous'
+};
 
 export default function TriageView() {
   const { patients, nowMin, online, loading } = useTriage();
   const [q, setQ] = useState('');
   const [filter, setFilter] = useState('tous');
-  const [focusTodo, setFocusTodo] = useState(false);
   const [openId, setOpenId] = useState(null);
 
   // Start polling the backend once mounted.
@@ -20,24 +29,17 @@ export default function TriageView() {
     return () => TriageStore.stop();
   }, []);
 
-  // Open the first row by default once data arrives.
-  useEffect(() => {
-    if (openId == null && patients.length) setOpenId(patients[0].id);
-  }, [patients, openId]);
+  // All rows start collapsed; switching tabs also collapses everything.
+  const selectFilter = (v) => { setFilter(v); setOpenId(null); };
 
-  const onCounter = () => {
-    const on = !focusTodo;
-    setFocusTodo(on);
-    setFilter(on ? 'todo' : 'tous');
-  };
-  const setFilterManual = (v) => { setFilter(v); setFocusTodo(false); };
+  // Highlight the urgent rows in the mixed views.
+  const highlightTodo = filter === 'tous' || filter === 'sans-treating';
 
   const list = patients.slice();
   list.sort((a, b) => b.sev - a.sev || timeToMin(a.time) - timeToMin(b.time) || a.nom.localeCompare(b.nom));
   const ql = q.trim().toLowerCase();
   const filtered = list.filter((p) => {
-    if (filter === 'todo' && !isTodo(p)) return false;
-    if (filter === 'treating' && p.status !== 'treating') return false;
+    if (!matchesFilter(p, filter)) return false;
     if (ql && !`${p.nom} ${p.prenom} ${p.addr} ${p.ville} ${p.type}`.toLowerCase().includes(ql)) return false;
     return true;
   });
@@ -45,7 +47,7 @@ export default function TriageView() {
 
   return (
     <div className="tv variant-sobre">
-      <Header {...{ q, setQ, filter, setFilter: setFilterManual, todoN, focusTodo, onCounter, online }} />
+      <Header {...{ q, setQ, filter, setFilter: selectFilter, todoN, online }} />
       <div className="tv-body">
         <div className="colh">
           <span>État</span><span>Patient</span><span>Adresse</span><span>Type d'alerte</span><span></span>
@@ -57,7 +59,7 @@ export default function TriageView() {
           const onToggle = (e) => { if (e) e.stopPropagation(); setOpenId(open ? null : p.id); };
           return (
             <div className={'rowwrap sev-' + p.sev + (p.status === 'treating' ? ' treating' : '') + (open ? ' open' : '')} key={p.id}>
-              <Row p={p} open={open} hl={focusTodo && isTodo(p)} nowMin={nowMin} onToggle={onToggle} />
+              <Row p={p} open={open} hl={highlightTodo && isTodo(p)} nowMin={nowMin} onToggle={onToggle} />
               {open && <DetailPanel p={p} />}
             </div>
           );

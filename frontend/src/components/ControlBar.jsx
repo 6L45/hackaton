@@ -31,6 +31,7 @@ export default function ControlBar() {
     background: '#5b3fd6', color: '#fff', display: 'flex', alignItems: 'center', gap: 7,
     boxShadow: pulse ? '0 0 0 4px rgba(91,63,214,.25)' : 'none', transition: 'box-shadow .2s',
   };
+  const behBtn = { ...sim, background: '#c026a8', boxShadow: pulse ? '0 0 0 4px rgba(192,38,168,.25)' : 'none' };
 
   return (
     <div style={wrap}>
@@ -41,6 +42,9 @@ export default function ControlBar() {
       </div>
       <button style={sim} onClick={() => { TriageStore.injectAlert(); setPulse(true); setTimeout(() => setPulse(false), 600); }}>
         <span style={{ fontSize: 14, lineHeight: 1 }}>＋</span> Simuler une alerte
+      </button>
+      <button style={behBtn} onClick={() => { TriageStore.injectBehavioral(); setPulse(true); setTimeout(() => setPulse(false), 600); }}>
+        <span style={{ fontSize: 14, lineHeight: 1 }}>⚠</span> Anomalie comportement
       </button>
     </div>
   );

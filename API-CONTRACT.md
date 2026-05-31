@@ -32,6 +32,29 @@ Notes :
 - Dans `vitals`, le champ avec `trig: true` est mis en avant comme « déclencheur ».
 - `status` est le champ de travail. Si le backend ne l'envoie pas, le front le dérive de `acked`.
 
+### Champ `behavioral` (source routine / téléphone)
+
+Deuxième source d'alerte, **indépendante** de la sévérité médicale `sev`. Construite en
+comparant les signaux téléphone du jour à la routine du patient (30 j d'historique, z-score).
+`null` quand rien d'anormal, sinon :
+
+```jsonc
+{
+  "level": "watch" | "alert",                 // watch = écart modéré, alert = fort/cumulé
+  "message": "Il y a peut-être quelque chose qui ne va pas.",
+  "score": 10.5,                              // magnitude (max des écarts, en σ)
+  "reasons": [
+    { "label": "Réveil tardif", "detail": "réveil très plus tard que d'habitude",
+      "today": "11:31", "usual": "07:53", "z": 10.5 },
+    { "label": "Contact référent non rappelé", "detail": "appel manqué de Robert (fils)…",
+      "today": "Robert (fils)", "usual": "rappel < 2 h", "z": null }   // z null = règle, pas z-score
+  ]
+}
+```
+
+Le frontend l'affiche dans une **couleur dédiée (magenta)**, distincte du vert→rouge médical et
+du bleu « en cours », pour identifier la source au premier coup d'œil.
+
 ## Endpoints
 
 | Méthode | Route                          | Body                          | Réponse                                  |
@@ -41,6 +64,7 @@ Notes :
 | PATCH   | `/api/patients/:id/status`     | `{ "status": "open\|treating" }` | `Patient` (mis à jour)                |
 | POST    | `/api/patients/:id/dispatch`   | `{ "force": false }`          | `{ "ok": true, "patientId": n }`         |
 | POST    | `/api/simulate/alert`          | —                             | `Patient` (nouvelle alerte, démo)        |
+| POST    | `/api/simulate/behavioral`     | —                             | `{ "ok": true, "patientId": n }` (démo)  |
 | GET     | `/api/health`                  | —                             | `{ "ok": true }`                         |
 
 - `nowMin` = « maintenant » en minutes depuis minuit, sert à calculer les temps relatifs (« il y a 12 min »). Avec un vrai backend, renvoyer l'heure courante.

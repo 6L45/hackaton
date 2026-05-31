@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ICON } from './icons.jsx';
 
-export default function Header({ q, setQ, filter, setFilter, todoN, focusTodo, onCounter, online }) {
+export default function Header({ q, setQ, filter, setFilter, todoN, online }) {
   const [clock, setClock] = useState('');
   useEffect(() => {
     const tick = () => setClock(new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
@@ -10,8 +10,13 @@ export default function Header({ q, setQ, filter, setFilter, todoN, focusTodo, o
     return () => clearInterval(id);
   }, []);
 
-  const seg = (val, label) => (
-    <button className={filter === val ? 'on' : ''} onClick={() => setFilter(val)}>{label}</button>
+  // Mutually-exclusive tabs: clicking selects; the active tab is a no-op.
+  // `badge` (optional) shows a count chip inside the tag — only when > 0.
+  const seg = (val, label, badge) => (
+    <button className={filter === val ? 'on' : ''} onClick={() => setFilter(val)}>
+      {label}
+      {badge > 0 && <span className="seg-badge">{badge}</span>}
+    </button>
   );
 
   return (
@@ -20,9 +25,6 @@ export default function Header({ q, setQ, filter, setFilter, todoN, focusTodo, o
         <span className="tv-title"><span className="crumb">Triage · </span>File d'attente</span>
         <span className="live mono"><span className="blip"></span>{clock}</span>
         {!online && <span className="live mono" title="Backend injoignable — données de démonstration" style={{ color: '#b4641e' }}>● hors-ligne (mock)</span>}
-        <button className={'counter' + (focusTodo ? ' active' : '')} onClick={onCounter} title="Afficher les patients à traiter">
-          À traiter <span className="badge">{todoN}</span>
-        </button>
       </div>
       <div className="tv-tools">
         <div className="search">
@@ -31,7 +33,8 @@ export default function Header({ q, setQ, filter, setFilter, todoN, focusTodo, o
         </div>
         <div className="seg2 statusfilter">
           {seg('tous', 'Tous')}
-          {seg('todo', 'À traiter')}
+          {seg('sans-treating', 'File active')}
+          {seg('todo', 'À traiter', todoN)}
           {seg('treating', 'En cours de traitement')}
         </div>
       </div>

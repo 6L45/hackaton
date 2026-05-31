@@ -8,14 +8,32 @@ se trouve dans [hifi/](hifi/) ; le code applicatif vit dans `frontend/` et `back
 
 ```
 frontend/   App Vite + React (la maquette convertie en vrais modules)
-backend/    Mock API Node/Express (à remplacer par le vrai backend)
+backend/    API Node/Express + simulation (vitals IoT + routine téléphone, SQLite)
 hifi/        Maquette d'origine (référence design, ne pas développer dessus)
 API-CONTRACT.md   Contrat d'API entre front et back
 ```
 
+## Deux sources d'alerte simulées
+
+1. **IoT médical** — constantes vitales qui dérivent dans le temps → sévérité 1–5
+   (vert→rouge). Code : `backend/src/simulation/`.
+2. **Routine comportementale** — signaux téléphone (réveil, usage écran, appels manqués,
+   contact référent non rappelé, inactivité). Une base SQLite garde ~30 jours d'historique
+   par patient ; le détecteur compare le jour courant à la routine (z-score) et lève un
+   warning « Il y a peut-être quelque chose qui ne va pas » affiché en **magenta** (source
+   distincte). Code : `backend/src/phone/` + `backend/src/db/`. La DB se crée et se seed
+   toute seule au 1ᵉʳ démarrage (`backend/data/triage.db`, ignorée par git).
+
 ## Démarrage
 
-Deux terminaux :
+Le plus simple — un seul terminal (installe les deps au besoin, lance les deux,
+Ctrl+C arrête tout) :
+
+```bash
+./start.sh
+```
+
+Ou manuellement, deux terminaux :
 
 ```bash
 # 1) backend (port 3001)

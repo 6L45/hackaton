@@ -94,6 +94,19 @@ const Store = {
     this._injectLocal();
   },
 
+  async injectBehavioral() {
+    if (this.state.online) {
+      try {
+        await api.simulateBehavioral();
+        await this.refresh();
+        return;
+      } catch {
+        /* fall through to local mock injection */
+      }
+    }
+    this._injectBehavioralLocal();
+  },
+
   // ----- helpers -----------------------------------------------------------
   _patch(id, patch) {
     this._set({
@@ -123,6 +136,32 @@ const Store = {
     };
     this._set({ nowMin, patients: [patient, ...this.state.patients] });
     setTimeout(() => this._patch(id, { isnew: false }), 7500);
+  },
+
+  // Offline fallback for the "behavioral anomaly" demo button: tag a mock
+  // patient with a synthetic routine alert (the real verdict comes from the
+  // backend's SQLite history + detector when online).
+  _behPool: [
+    { level: 'alert', score: 4.2, reasons: [
+      { label: 'Réveil tardif', detail: "réveil bien plus tard que d'habitude", today: '11:18', usual: '07:30', z: 4.2 },
+      { label: 'Usage écran en chute', detail: "temps d'écran bien plus faible que d'habitude", today: '34 min', usual: '3 h 05', z: 3.1 },
+    ] },
+    { level: 'alert', score: 4.0, reasons: [
+      { label: 'Contact référent non rappelé', detail: 'appel manqué de Camille (fille), non rappelé aujourd’hui', today: 'Camille (fille)', usual: 'rappel < 2 h', z: null },
+      { label: 'Inactivité prolongée', detail: 'aucune activité téléphone depuis 5 h 10', today: '10:02', usual: 'usage régulier', z: null },
+    ] },
+    { level: 'watch', score: 3.0, reasons: [
+      { label: 'Appels manqués inhabituels', detail: 'taux de réponse aux appels en forte baisse', today: '18 %', usual: '94 %', z: 3.0 },
+    ] },
+  ],
+  _injectBehavioralLocal() {
+    const candidates = this.state.patients.filter((p) => !p.behavioral);
+    if (!candidates.length) return;
+    const p = candidates[Math.floor(Math.random() * candidates.length)];
+    const tpl = this._behPool[Math.floor(Math.random() * this._behPool.length)];
+    this._patch(p.id, {
+      behavioral: { message: 'Il y a peut-être quelque chose qui ne va pas.', ...tpl },
+    });
   },
 };
 

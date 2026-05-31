@@ -45,3 +45,8 @@ export function dispatchTeam(id, { force = false } = {}) {
 export function simulateAlert() {
   return req('/simulate/alert', { method: 'POST' });
 }
+
+/** POST /api/simulate/behavioral → { ok, patientId } (demo helper) */
+export function simulateBehavioral() {
+  return req('/simulate/behavioral', { method: 'POST' });
+}

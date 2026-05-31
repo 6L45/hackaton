@@ -7,9 +7,30 @@ export default function DetailPanel({ p }) {
   useEffect(() => { setConfirming(false); }, [treating]);
   const stop = (e) => e.stopPropagation();
 
+  const beh = p.behavioral;
+
   return (
     <div className="detail" onClick={stop}>
       <div className="detgrid">
+        {beh && (
+          <div className="behbox">
+            <div className="behhead">
+              <span className="beh-chip">⚠ Comportement</span>
+              <span className="behmsg">{beh.message}</span>
+            </div>
+            <p className="behnote">Analyse de la routine (signaux téléphone) · écart vs habitudes établies sur 30 jours</p>
+            <div className="behreasons">
+              {beh.reasons.map((r, i) => (
+                <div key={i} className="behreason">
+                  <span className="brl">{r.label}</span>
+                  <span className="brd">{r.detail}</span>
+                  <span className="brv">auj. <b>{r.today}</b> · habituel {r.usual}</span>
+                  {r.z != null && <span className="brz">{r.z}σ</span>}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         <div className="dbox">
           <h4>Données capteurs · IoT</h4>
           <p className="dnote">Valeurs renvoyées par le backend au déclenchement de l'alerte</p>
@@ -54,10 +75,8 @@ export default function DetailPanel({ p }) {
                 Envoyer une équipe
               </button>
               <button className="btn" onClick={stop}>Appeler le patient</button>
-              {treating ? (
+              {treating && (
                 <button className="btn done" onClick={(e) => { stop(e); TriageStore.setStatus(p.id, 'open'); }}>✓ Traité</button>
-              ) : (
-                <button className="btn" onClick={(e) => { stop(e); TriageStore.setStatus(p.id, 'treating'); }}>Marquer comme traité</button>
               )}
             </>
           )}

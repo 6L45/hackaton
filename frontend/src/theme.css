@@ -11,13 +11,16 @@
   --accent:#5b3fd6; --accent-ink:#ffffff; --accent-soft:#efeaff;
   --shadow:24px 28px 60px rgba(20,28,50,.10);
   --shadow-sm:0 1px 2px rgba(20,28,50,.06);
-  --treat-t:oklch(0.945 0.018 255); --treat-a:oklch(0.585 0.050 255); /* en cours de traitement — low saturation */
-  /* severity ramp — chroma (vividness) rises with criticality */
-  --s1-t:oklch(0.967 0.006 175); --s1-a:oklch(0.60 0.015 175);
-  --s2-t:oklch(0.958 0.034 150); --s2-a:oklch(0.58 0.090 150);
-  --s3-t:oklch(0.950 0.075 95);  --s3-a:oklch(0.63 0.130 88);
-  --s4-t:oklch(0.925 0.115 60);  --s4-a:oklch(0.61 0.180 52);
-  --s5-t:oklch(0.862 0.155 30);  --s5-a:oklch(0.55 0.215 28);
+  /* en cours de traitement — distinct blue, OUTSIDE the green→red ramp */
+  --treat-t:oklch(0.940 0.045 250); --treat-a:oklch(0.560 0.140 250);
+  /* anomalie comportementale (source routine/téléphone) — magenta, distinct de tout le reste */
+  --beh-t:oklch(0.945 0.060 330); --beh-a:oklch(0.560 0.190 330);
+  /* severity ramp: stable=green → critique=red; saturation rises with criticality */
+  --s1-t:oklch(0.960 0.050 148); --s1-a:oklch(0.620 0.110 148);
+  --s2-t:oklch(0.952 0.082 120); --s2-a:oklch(0.640 0.140 120);
+  --s3-t:oklch(0.944 0.115 92);  --s3-a:oklch(0.660 0.165 88);
+  --s4-t:oklch(0.918 0.140 58);  --s4-a:oklch(0.620 0.195 52);
+  --s5-t:oklch(0.870 0.170 28);  --s5-a:oklch(0.560 0.230 28);
 }
 [data-theme="dark"]{
   --bg:#0f1219; --surface:#161a21; --surface2:#1b2029; --surface3:#212835;
@@ -25,12 +28,13 @@
   --line:#252b36; --line2:#343c4a;
   --accent:#9277ff; --accent-ink:#ffffff; --accent-soft:#241f3d;
   --shadow:0 24px 60px rgba(0,0,0,.5); --shadow-sm:0 1px 2px rgba(0,0,0,.35);
-  --treat-t:oklch(0.300 0.018 255); --treat-a:oklch(0.660 0.060 255);
-  --s1-t:oklch(0.255 0.007 175); --s1-a:oklch(0.64 0.020 175);
-  --s2-t:oklch(0.285 0.030 150); --s2-a:oklch(0.72 0.100 150);
-  --s3-t:oklch(0.320 0.055 92);  --s3-a:oklch(0.77 0.130 88);
-  --s4-t:oklch(0.345 0.090 55);  --s4-a:oklch(0.74 0.170 52);
-  --s5-t:oklch(0.395 0.120 28);  --s5-a:oklch(0.72 0.200 28);
+  --treat-t:oklch(0.300 0.055 250); --treat-a:oklch(0.700 0.140 250);
+  --beh-t:oklch(0.330 0.075 330); --beh-a:oklch(0.730 0.180 330);
+  --s1-t:oklch(0.260 0.035 148); --s1-a:oklch(0.680 0.110 148);
+  --s2-t:oklch(0.290 0.055 120); --s2-a:oklch(0.720 0.140 120);
+  --s3-t:oklch(0.322 0.075 92);  --s3-a:oklch(0.760 0.165 88);
+  --s4-t:oklch(0.348 0.095 55);  --s4-a:oklch(0.740 0.195 52);
+  --s5-t:oklch(0.395 0.120 28);  --s5-a:oklch(0.720 0.225 28);
 }
 
 .sev-1{ --tint:var(--s1-t); --acc:var(--s1-a); }
@@ -85,6 +89,8 @@
 .seg2{ display:flex; background:var(--surface2); border:1px solid var(--line2); border-radius:8px; padding:3px; }
 .seg2 button{ font-family:inherit; font-size:12.5px; font-weight:600; color:var(--ink-soft); border:none; background:transparent; padding:6px 12px; border-radius:6px; cursor:pointer; transition:all .12s; }
 .seg2 button.on{ color:var(--ink); background:var(--surface); box-shadow:var(--shadow-sm); }
+.seg2 button{ display:inline-flex; align-items:center; }
+.seg2 .seg-badge{ display:inline-flex; align-items:center; justify-content:center; min-width:18px; height:18px; padding:0 5px; margin-left:7px; border-radius:9px; background:var(--s5-a); color:#fff; font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:700; line-height:1; }
 
 /* ---------- table body (grows with content) ---------- */
 .tv-body{ overflow:visible; flex:1 0 auto; }
@@ -196,6 +202,25 @@
 /* ---------- treatment status + highlight + page shell ---------- */
 .rowwrap.treating, .row.treating{ --tint:var(--treat-t); --acc:var(--treat-a); }
 .treat-chip{ font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.4px; white-space:nowrap; color:var(--ink-soft); background:var(--surface); border:1px solid var(--line2); border-radius:5px; padding:2px 7px; }
+
+/* ---------- behavioral anomaly (phone-routine source) ---------- */
+/* A distinct magenta marker overlaid on a row WITHOUT replacing the medical
+   severity colour, so both sources stay readable. */
+.row.beh::after{ content:''; position:absolute; right:0; top:0; bottom:0; width:4px; background:var(--beh-a); }
+.beh-chip{ display:inline-flex; align-items:center; gap:4px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.3px; white-space:nowrap; color:#fff; background:var(--beh-a); border-radius:5px; padding:2px 7px; }
+.detail .behbox{ grid-column:1 / -1; border:1px solid var(--beh-a); background:color-mix(in oklab, var(--beh-t) 60%, var(--surface)); border-radius:11px; padding:13px 15px; margin-bottom:2px; }
+[data-theme="dark"] .detail .behbox{ background:color-mix(in oklab, var(--beh-a) 14%, var(--surface)); }
+.behbox .behhead{ display:flex; align-items:center; gap:9px; margin-bottom:4px; }
+.behbox .behhead .beh-chip{ background:var(--beh-a); }
+.behbox .behmsg{ font-weight:600; font-size:14px; color:var(--ink); }
+.behbox .behnote{ font-size:12px; color:var(--ink-soft); margin:0 0 10px; }
+.behbox .behreasons{ display:flex; flex-direction:column; gap:6px; }
+.behreason{ display:flex; align-items:baseline; gap:10px; font-size:13px; flex-wrap:wrap; }
+.behreason .brl{ font-weight:600; color:var(--ink); min-width:180px; }
+.behreason .brd{ color:var(--ink-soft); flex:1; }
+.behreason .brv{ font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink); }
+.behreason .brv b{ color:color-mix(in oklab, var(--beh-a) 75%, var(--ink)); }
+.behreason .brz{ font-family:'IBM Plex Mono',monospace; font-size:11px; color:#fff; background:var(--beh-a); border-radius:5px; padding:1px 6px; }
 
 .alertpill.none{ opacity:.55; }
 
