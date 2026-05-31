@@ -4,7 +4,6 @@
 # Installe les dépendances au besoin. Ctrl+C arrête les deux proprement.
 # =============================================================================
 set -euo pipefail
-
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # --- dépendances (install seulement si manquantes) ---------------------------
@@ -27,14 +26,20 @@ cleanup() {
 }
 trap cleanup EXIT INT TERM
 
+# --- détection IP locale ------------------------------------------------------
+LOCAL_IP=$(ip route get 1.1.1.1 2>/dev/null | awk '{for(i=1;i<=NF;i++) if($i=="src") print $(i+1); exit}')
+
 # --- lancement ----------------------------------------------------------------
 echo "→ Backend  : http://localhost:3001/api"
 (cd "$ROOT/backend" && npm run dev) &
 pids+=($!)
 
 echo "→ Frontend : http://localhost:5173"
-(cd "$ROOT/frontend" && npm run dev) &
+(cd "$ROOT/frontend" && npx vite --host) &
 pids+=($!)
 
 echo "→ Prêt. Ctrl+C pour tout arrêter."
+if [ -n "$LOCAL_IP" ]; then
+  echo "→ Accès téléphone : http://$LOCAL_IP:5173"
+fi
 wait

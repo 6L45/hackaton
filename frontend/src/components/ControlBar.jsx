@@ -1,20 +1,44 @@
 import { useEffect, useState } from 'react';
 import { TriageStore } from '../store.js';
 
+// True on narrow viewports (phones / small tablets).
+function useNarrow(maxWidth = 720) {
+  const [narrow, setNarrow] = useState(
+    typeof window !== 'undefined' && window.matchMedia(`(max-width:${maxWidth}px)`).matches
+  );
+  useEffect(() => {
+    const mq = window.matchMedia(`(max-width:${maxWidth}px)`);
+    const onChange = (e) => setNarrow(e.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, [maxWidth]);
+  return narrow;
+}
+
 export default function ControlBar() {
   const [theme, setTheme] = useState('light');
   useEffect(() => { document.documentElement.dataset.theme = theme; }, [theme]);
   const [pulse, setPulse] = useState(false);
+  const narrow = useNarrow();
 
+  // Wide screens: floating pill, top-right. Narrow screens: a normal in-flow
+  // bar at the top that wraps — so it never sits on top of the content.
   const wrap = {
-    position: 'fixed', top: 14, right: 16, zIndex: 9000,
-    display: 'flex', alignItems: 'center', gap: 8,
+    display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap',
     background: theme === 'dark' ? '#1b2029' : '#ffffff',
     border: '1px solid ' + (theme === 'dark' ? '#333b48' : '#d6dbe2'),
-    borderRadius: 12, padding: '7px 9px',
-    boxShadow: '0 6px 24px rgba(20,28,50,.16)',
     fontFamily: "'IBM Plex Sans', system-ui, sans-serif",
     color: theme === 'dark' ? '#e9ecf2' : '#1b2130',
+    ...(narrow
+      ? {
+          position: 'static', width: '100%', justifyContent: 'center',
+          borderWidth: '0 0 1px 0', borderRadius: 0, padding: '10px 12px',
+        }
+      : {
+          position: 'fixed', top: 14, right: 16, zIndex: 9000,
+          borderRadius: 12, padding: '7px 9px',
+          boxShadow: '0 6px 24px rgba(20,28,50,.16)',
+        }),
   };
   const segWrap = { display: 'flex', background: theme === 'dark' ? '#0f1219' : '#f0f2f6', borderRadius: 9, padding: 3 };
   const segBtn = (on) => ({
